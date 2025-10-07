@@ -4,20 +4,68 @@ const Login: React.FC = () => {
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [emailError, setEmailError] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
+  const [formError, setFormError] = useState<string>('');
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setEmail(e.target.value);
+      const newEmail = e.target.value;
+      setEmail(newEmail);
+
+      setEmailError('');
+      setFormError('');
+
+      if (newEmail.trim() === '') {
+          setEmailError('Email address is required.');
+      } else if (!emailRegex.test(newEmail)) {
+          setEmailError('Please enter a valid email address.');
+      }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPassword(e.target.value);
+      const newPassword = e.target.value;
+      setPassword(newPassword);
+
+      setPasswordError('');
+      setFormError('');
+
+      if (newPassword.trim() === '') {
+          setPasswordError('Password is required.');
+      }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      console.log('Login attempt with:');
-      console.log('Email:', email);
-      console.log('Password:', password);
+      let isValid = true;
+
+        if (email.trim() === '') {
+            setEmailError('Email address is required.');
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            setEmailError('Please enter a valid email address.');
+            isValid = false;
+        } else {
+            setEmailError('');
+        }
+
+        if (password.trim() === '') {
+            setPasswordError('Password is required.');
+            isValid = false;
+        } else {
+            setPasswordError('');
+        }
+
+        if (isValid) {
+            console.log('Attempting login with:');
+            console.log('Email:', email);
+            console.log('Password:', password);
+            setFormError('');
+        } else {
+            console.log('Client-side validation failed. Please correct errors.');
+            setFormError('Please correct the errors in the form.');
+        }
   };
 
   return (
@@ -25,6 +73,12 @@ const Login: React.FC = () => {
       {/* Login Card/Container */}
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Login</h2>
+
+          {formError && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span className="block sm:inline">{formError}</span>
+                </div>
+            )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Email Input */}
@@ -37,8 +91,9 @@ const Login: React.FC = () => {
                   id="email"
                   name="email"
                   placeholder="you@example.com"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
+                  className={`mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm
+                        ${emailError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}
+                  `}
                   value={email}
                   onChange={handleEmailChange}
               />
@@ -54,11 +109,13 @@ const Login: React.FC = () => {
                   id="password"
                   name="password"
                   placeholder="Enter your password"
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  required
+                  className={`mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm
+                        ${passwordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}
+                  `}
                   value={password}
                   onChange={handlePasswordChange}
               />
+              {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
           </div>
 
           {/* Login Button */}
