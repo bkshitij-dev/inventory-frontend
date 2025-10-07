@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from "react-router-dom";
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -239,12 +240,7 @@ const Register: React.FC = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
-            <a 
-                href="#" 
-                className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                    Login here
-            </a>
+            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">Login here</Link>
           </p>
         </div>
       </div>
