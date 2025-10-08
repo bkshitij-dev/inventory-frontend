@@ -1,4 +1,9 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+
+import { AuthResponse, login } from "../services/authService";
+
 import InputField from '../components/InputField'; 
 
 import useFormValidation from '../hooks/useFormValidation';
@@ -8,24 +13,29 @@ import { EMAIL_REGEX } from '../constants';
 const Login: React.FC = () => {
 
     const initialValues = {
-        email: '',
+        usernameOrEmail: '',
         password: '',
     };
 
+    const [loading, setLoading] = useState(false);
+    const [serverError, setServerError] = useState<string | null>(null);
+
+    const navigate = useNavigate();
+
     const validationRules = {
-        email: (value: string) => {
-        if (value.trim() === '') {
-            return 'Email address is required.';
-        } else if (!EMAIL_REGEX.test(value)) {
-            return 'Please enter a valid email address.';
-        }
-        return null; // No error
+        usernameOrEmail: (value: string) => {
+            if (value.trim() === '') {
+                return 'Email address is required.';
+            } else if (!EMAIL_REGEX.test(value)) {
+                return 'Please enter a valid email address.';
+            }
+            return null; // No error
         },
         password: (value: string) => {
-        if (value.trim() === '') {
-            return 'Password is required.';
-        }
-        return null; // No error
+            if (value.trim() === '') {
+                return 'Password is required.';
+            }
+            return null; // No error
         },
     };
 
@@ -37,7 +47,7 @@ const Login: React.FC = () => {
         setErrors, // Expose setErrors to set general form errors
     } = useFormValidation(initialValues, validationRules);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const isValid = validateForm();
 
@@ -45,6 +55,24 @@ const Login: React.FC = () => {
             setErrors((prevErrors) => ({ ...prevErrors, form: undefined }));
         } else {
             setErrors((prevErrors) => ({ ...prevErrors, form: 'Please correct the errors in the form.' }));
+            return;
+        }
+
+        setLoading(true);
+        setServerError(null);
+
+        try {
+            const res: AuthResponse = await login(values);
+
+            // Store token securely
+            localStorage.setItem("accessToken", res.accessToken);
+
+            // Redirect after login
+            navigate("/dashboard");
+        } catch (err: any) {
+            setServerError(err.response?.data?.message || "Invalid credentials. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -64,13 +92,13 @@ const Login: React.FC = () => {
           {/* Email Input */}
           <InputField
                 label="Email Address"
-                id="email"
-                name="email"
+                id="usernameOrEmail"
+                name="usernameOrEmail"
                 type="email"
                 placeholder="you@example.com"
-                value={values.email}
+                value={values.usernameOrEmail}
                 onChange={handleChange}
-                error={errors.email}
+                error={errors.usernameOrEmail}
             />
 
           {/* Password Input */}
@@ -91,8 +119,15 @@ const Login: React.FC = () => {
               type="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-              Log In
+            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+            {loading ? "Logging in..." : "Log In"}
           </button>
+
+          {serverError && (
+            <p className="text-sm text-red-600 text-center mt-2">
+              {serverError}
+            </p>
+          )}
           </form>
 
           {/* Link to Registration */}

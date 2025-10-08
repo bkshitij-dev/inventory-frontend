@@ -1,4 +1,8 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+
+import { register } from "../services/authService";
 
 import InputField from '../components/InputField'; 
 
@@ -22,6 +26,12 @@ const Register: React.FC = () => {
     password: '',
     confirmPassword: '',
   };
+
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const navigate = useNavigate();
 
   const validationRules = {
     username: (value: string) => {
@@ -75,15 +85,30 @@ const Register: React.FC = () => {
     resetForm, // Expose resetForm to clear fields on success
   } = useFormValidation(initialValues, validationRules);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const isValid = validateForm();
 
     if (isValid) {
       setErrors((prevErrors) => ({ ...prevErrors, form: undefined }));
-
     } else {
       setErrors((prevErrors) => ({ ...prevErrors, form: 'Please correct the errors in the form.' }));
+      return;
+    }
+
+    setLoading(true);
+    setServerError(null);
+
+    try {
+      await register(values);
+      setSuccess(true);
+
+      // Optional: redirect to login after delay
+      setTimeout(() => navigate("/login"), 1000);
+    } catch (err: any) {
+        setServerError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -159,8 +184,21 @@ const Register: React.FC = () => {
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
-            Register
+            {loading && <Loader2 className="w-5 h-5 animate-spin" />}
+            {loading ? "Creating account..." : "Register"}
           </button>
+
+          {serverError && (
+            <p className="text-sm text-red-600 text-center mt-2">
+              {serverError}
+            </p>
+          )}
+
+          {success && (
+            <p className="text-sm text-green-600 text-center mt-2">
+              Account created successfully! Redirecting to login...
+            </p>
+          )}
         </form>
 
         {/* Link to Login */}
