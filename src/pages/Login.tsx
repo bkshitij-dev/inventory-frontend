@@ -1,73 +1,52 @@
-import { useState } from 'react';
 import { Link } from "react-router-dom";
+import InputField from '../components/InputField'; 
+
+import useFormValidation from '../hooks/useFormValidation';
+
+import { EMAIL_REGEX } from '../constants';
 
 const Login: React.FC = () => {
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [emailError, setEmailError] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
-  const [formError, setFormError] = useState<string>('');
+    const initialValues = {
+        email: '',
+        password: '',
+    };
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newEmail = e.target.value;
-      setEmail(newEmail);
-
-      setEmailError('');
-      setFormError('');
-
-      if (newEmail.trim() === '') {
-          setEmailError('Email address is required.');
-      } else if (!emailRegex.test(newEmail)) {
-          setEmailError('Please enter a valid email address.');
-      }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newPassword = e.target.value;
-      setPassword(newPassword);
-
-      setPasswordError('');
-      setFormError('');
-
-      if (newPassword.trim() === '') {
-          setPasswordError('Password is required.');
-      }
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      let isValid = true;
-
-        if (email.trim() === '') {
-            setEmailError('Email address is required.');
-            isValid = false;
-        } else if (!emailRegex.test(email)) {
-            setEmailError('Please enter a valid email address.');
-            isValid = false;
-        } else {
-            setEmailError('');
+    const validationRules = {
+        email: (value: string) => {
+        if (value.trim() === '') {
+            return 'Email address is required.';
+        } else if (!EMAIL_REGEX.test(value)) {
+            return 'Please enter a valid email address.';
         }
-
-        if (password.trim() === '') {
-            setPasswordError('Password is required.');
-            isValid = false;
-        } else {
-            setPasswordError('');
+        return null; // No error
+        },
+        password: (value: string) => {
+        if (value.trim() === '') {
+            return 'Password is required.';
         }
+        return null; // No error
+        },
+    };
+
+    const {
+        values,
+        errors,
+        handleChange,
+        validateForm,
+        setErrors, // Expose setErrors to set general form errors
+    } = useFormValidation(initialValues, validationRules);
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const isValid = validateForm();
 
         if (isValid) {
-            console.log('Attempting login with:');
-            console.log('Email:', email);
-            console.log('Password:', password);
-            setFormError('');
+            setErrors((prevErrors) => ({ ...prevErrors, form: undefined }));
         } else {
-            console.log('Client-side validation failed. Please correct errors.');
-            setFormError('Please correct the errors in the form.');
+            setErrors((prevErrors) => ({ ...prevErrors, form: 'Please correct the errors in the form.' }));
         }
-  };
+    };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
@@ -75,49 +54,36 @@ const Login: React.FC = () => {
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Login</h2>
 
-          {formError && (
+          {errors.form && ( // Access general form error from errors object
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span className="block sm:inline">{formError}</span>
+                    <span className="block sm:inline">{errors.form}</span>
                 </div>
             )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Email Input */}
-          <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-              </label>
-              <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="you@example.com"
-                  className={`mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm
-                        ${emailError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}
-                  `}
-                  value={email}
-                  onChange={handleEmailChange}
-              />
-          </div>
+          <InputField
+                label="Email Address"
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                value={values.email}
+                onChange={handleChange}
+                error={errors.email}
+            />
 
           {/* Password Input */}
-          <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-              </label>
-              <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  className={`mt-1 block w-full px-4 py-2 border rounded-md shadow-sm sm:text-sm
-                        ${passwordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'}
-                  `}
-                  value={password}
-                  onChange={handlePasswordChange}
-              />
-              {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
-          </div>
+          <InputField
+                label="Password"
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                value={values.password}
+                onChange={handleChange}
+                error={errors.password}
+            />
 
           {/* Login Button */}
           <button
