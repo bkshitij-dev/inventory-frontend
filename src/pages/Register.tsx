@@ -4,7 +4,15 @@ import InputField from '../components/InputField';
 
 import useFormValidation from '../hooks/useFormValidation';
 
-import { EMAIL_REGEX } from '../constants';
+import {
+  MIN_USERNAME_LENGTH,
+  EMAIL_REGEX,
+  HAS_UPPERCASE_REGEX,
+  HAS_LOWERCASE_REGEX,
+  HAS_NUMBER_REGEX,
+  HAS_SPECIAL_CHAR_REGEX,
+  MIN_PASSWORD_LENGTH,
+} from '../constants';
 
 const Register: React.FC = () => {
 
@@ -19,8 +27,8 @@ const Register: React.FC = () => {
     username: (value: string) => {
       if (value.trim() === '') {
         return 'Username is required.';
-      } else if (value.length < 3) {
-        return 'Username must be at least 3 characters long.';
+      } else if (value.length < MIN_USERNAME_LENGTH) {
+        return `Username must be at least ${MIN_USERNAME_LENGTH} characters long.`;
       }
       return null;
     },
@@ -35,8 +43,16 @@ const Register: React.FC = () => {
     password: (value: string) => {
       if (value.trim() === '') {
         return 'Password is required.';
-      } else if (value.length < 6) {
-        return 'Password must be at least 6 characters long.';
+      } else if (value.length < MIN_PASSWORD_LENGTH) {
+        return `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`;
+      } else if (!HAS_UPPERCASE_REGEX.test(value)) {
+        return 'Password must contain at least one uppercase letter.';
+      } else if (!HAS_LOWERCASE_REGEX.test(value)) {
+        return 'Password must contain at least one lowercase letter.';
+      } else if (!HAS_NUMBER_REGEX.test(value)) {
+        return 'Password must contain at least one number.';
+      } else if (!HAS_SPECIAL_CHAR_REGEX.test(value)) {
+        return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).';
       }
       return null;
     },
@@ -122,6 +138,7 @@ const Register: React.FC = () => {
             value={values.password}
             onChange={handleChange}
             error={errors.password}
+            showPasswordToggle={true}
           />
 
           {/* Confirm Password Input */}
@@ -134,6 +151,7 @@ const Register: React.FC = () => {
             value={values.confirmPassword}
             onChange={handleChange}
             error={errors.confirmPassword}
+            showPasswordToggle={true}
           />
 
           {/* Register Button */}

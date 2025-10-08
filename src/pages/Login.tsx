@@ -83,6 +83,7 @@ const Login: React.FC = () => {
                 value={values.password}
                 onChange={handleChange}
                 error={errors.password}
+                showPasswordToggle={true}
             />
 
           {/* Login Button */}
