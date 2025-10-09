@@ -24,3 +24,11 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const { data } = await api.post<AuthResponse>("/auth/login", payload);
   return data;
 }
+
+export const verifyUser = async (token: string) => {
+  return api.get(`/auth/verify?token=${token}`);
+};
+
+export const resendVerificationEmail = async (token: string) => {
+  return api.get(`/auth/resend-verification?token=${token}`);
+};
