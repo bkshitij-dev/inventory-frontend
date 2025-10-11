@@ -1,9 +1,9 @@
 import { api } from "../utils/api";
 
 export interface RegisterPayload {
-    username: string;
-    email: string;
-    password: string;
+  username: string;
+  email: string;
+  password: string;
 }
 
 export interface LoginPayload {
@@ -29,6 +29,10 @@ export const verifyUser = async (token: string) => {
   return api.get(`/auth/verify?token=${token}`);
 };
 
-export const resendVerificationEmail = async (token: string) => {
+export const resendVerificationEmailUsingEmail = async (email: string) => {
+  return api.get(`/auth/resend-verification?email=${email}`);
+};
+
+export const resendVerificationEmailUsingToken = async (token: string) => {
   return api.get(`/auth/resend-verification?token=${token}`);
 };
