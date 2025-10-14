@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
+import { ApiResponse } from "../types/ApiResponse";
 import { AuthResponse, login } from "../services/authService";
 
 import InputField from '../components/InputField'; 
@@ -62,12 +63,8 @@ const Login: React.FC = () => {
         setServerError(null);
 
         try {
-            const res: AuthResponse = await login(values);
-
-            // Store token securely
-            localStorage.setItem("accessToken", res.accessToken);
-
-            // Redirect after login
+            const res: ApiResponse<AuthResponse> = await login(values);
+            localStorage.setItem("accessToken", res.data!.accessToken);
             navigate("/dashboard");
         } catch (err: any) {
             setServerError(err.response?.data?.message || "Invalid credentials. Please try again.");

@@ -25,11 +25,11 @@ const Verify: React.FC = () => {
             try {
                 const response = await verifyUser(token);
                 setStatus("success");
-                setMessage(response.data?.message || "User successfully verified!");
+                setMessage(response?.message || "User successfully verified!");
             } catch (error: any) {
                 setStatus("error");
                 setMessage(
-                    error.response?.data?.message ||
+                    error.response?.message ||
                     "Invalid or expired verification link."
                 );
                 setEmail(error.response?.data?.email || "");
@@ -52,7 +52,7 @@ const Verify: React.FC = () => {
             setMessage("Verification email resent successfully!");
         } catch (error: any) {
             setMessage(
-                error.response?.data?.message || "Failed to resend verification email"
+                error.response?.message || "Failed to resend verification email"
             );
         } finally {
             setResendLoading(false);

@@ -1,4 +1,5 @@
 import { api } from "../utils/api";
+import { ApiResponse } from "../types/ApiResponse";
 
 export interface RegisterPayload {
   username: string;
@@ -15,24 +16,32 @@ export interface AuthResponse {
   accessToken: string;
 }
 
-export async function register(payload: RegisterPayload) {
-  const { data } = await api.post("/auth/register", payload);
+export async function register(payload: RegisterPayload): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/register", payload);
   return data;
 }
 
-export async function login(payload: LoginPayload): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>("/auth/login", payload);
+export async function login(payload: LoginPayload): Promise<ApiResponse<AuthResponse>> {
+  const { data } = await api.post<ApiResponse<AuthResponse>>("/auth/login", payload);
   return data;
 }
 
-export const verifyUser = async (token: string) => {
-  return api.get(`/auth/verify?token=${token}`);
+export async function verifyUser(token: string): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/verify", {token});
+  return data;
 };
 
-export const resendVerificationEmailUsingEmail = async (email: string) => {
-  return api.get(`/auth/resend-verification?email=${email}`);
+export async function resendVerificationEmailUsingEmail(email: string): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/resend-verification", {email});
+  return data;
 };
 
-export const resendVerificationEmailUsingToken = async (token: string) => {
-  return api.get(`/auth/resend-verification?token=${token}`);
+export async function resendVerificationEmailUsingToken(token: string): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/resend-verification", {token});
+  return data;
+};
+
+export async function sendForgotPasswordEmail(email: string): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/forgot-password", {email});
+  return data;
 };
