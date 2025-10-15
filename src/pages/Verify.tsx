@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { verifyUser, resendVerificationEmailUsingToken } from "../services/authService";
 import { Loader2 } from "lucide-react";
+import { USER_ALREADY_VALIDATED } from "../constants/errorCodes";
+import { messages } from "../constants/messages";
 
 const Verify: React.FC = () => {
 
@@ -9,6 +11,7 @@ const Verify: React.FC = () => {
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState<string>("");
     const [email, setEmail] = useState<string>("");
+    const [errorCode, setErrorCode] = useState<string>("");
     const [resendLoading, setResendLoading] = useState(false);
 
     const token = searchParams.get("token");
@@ -17,7 +20,7 @@ const Verify: React.FC = () => {
     useEffect(() => {
         if (!token) {
             setStatus("error");
-            setMessage("Invalid verification link");
+            setMessage(messages.INVALID_VERIFICATION_LINK);
             return;
         }
 
@@ -25,13 +28,11 @@ const Verify: React.FC = () => {
             try {
                 const response = await verifyUser(token);
                 setStatus("success");
-                setMessage(response?.message || "User successfully verified!");
+                setMessage(response?.message || messages.USER_SUCCESSFULLY_VERIFIED);
             } catch (error: any) {
                 setStatus("error");
-                setMessage(
-                    error.response?.message ||
-                    "Invalid or expired verification link."
-                );
+                setErrorCode(error.response?.data?.errorCode);
+                setMessage(error.response?.data?.message || messages.INVALID_VERIFICATION_LINK);
                 setEmail(error.response?.data?.email || "");
             }
         };
@@ -42,17 +43,17 @@ const Verify: React.FC = () => {
     const handleResend = async () => {
         if (!token) {
             setStatus("error");
-            setMessage("Invalid verification link");
+            setMessage(messages.INVALID_VERIFICATION_LINK);
             return;
         }
 
         try {
             setResendLoading(true);
             await resendVerificationEmailUsingToken(token);
-            setMessage("Verification email resent successfully!");
+            setMessage(messages.VERIFICATION_EMAIL_RESENT);
         } catch (error: any) {
             setMessage(
-                error.response?.message || "Failed to resend verification email"
+                error.response?.data?.message || messages.VERIFICATION_EMAIL_RESEND_FAILED
             );
         } finally {
             setResendLoading(false);
@@ -87,6 +88,8 @@ const Verify: React.FC = () => {
                         <h1 className="text-2xl font-semibold text-red-600 mb-4">
                             { message }
                         </h1>
+                        {errorCode !== USER_ALREADY_VALIDATED ?
+                        <>
                         <p className="text-gray-600 mb-4">
                             If your verification link has expired, you can request a new one.
                         </p>
@@ -97,6 +100,12 @@ const Verify: React.FC = () => {
                         >
                             { resendLoading ? "Resending..." : "Resend Verification Email" }
                         </button>
+                        </> : <button
+                            onClick={ () => navigate("/login") }
+                            className="text-blue-600 hover:underline">
+                            Go to Login
+                        </button>
+                        }
                     </>
                 ) }
             </div>
