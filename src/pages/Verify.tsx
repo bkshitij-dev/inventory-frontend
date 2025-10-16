@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { verifyUser, resendVerificationEmailUsingToken } from "../services/authService";
 import { Loader2 } from "lucide-react";
-import { USER_ALREADY_VALIDATED } from "../constants/errorCodes";
+import { errorCodes } from "../constants/errorCodes";
 import { messages } from "../constants/messages";
 
 const Verify: React.FC = () => {
@@ -21,10 +21,12 @@ const Verify: React.FC = () => {
         if (!token) {
             setStatus("error");
             setMessage(messages.INVALID_VERIFICATION_LINK);
+            setErrorCode(errorCodes.MISSING_VERIFICATION_LINK)
             return;
         }
 
         const verify = async () => {
+            console.log("verify");
             try {
                 const response = await verifyUser(token);
                 setStatus("success");
@@ -44,14 +46,17 @@ const Verify: React.FC = () => {
         if (!token) {
             setStatus("error");
             setMessage(messages.INVALID_VERIFICATION_LINK);
+            setErrorCode(errorCodes.MISSING_VERIFICATION_LINK);
             return;
         }
 
         try {
             setResendLoading(true);
             await resendVerificationEmailUsingToken(token);
+            setStatus("success");
             setMessage(messages.VERIFICATION_EMAIL_RESENT);
         } catch (error: any) {
+            setStatus("error");
             setMessage(
                 error.response?.data?.message || messages.VERIFICATION_EMAIL_RESEND_FAILED
             );
@@ -88,7 +93,7 @@ const Verify: React.FC = () => {
                         <h1 className="text-2xl font-semibold text-red-600 mb-4">
                             { message }
                         </h1>
-                        {errorCode !== USER_ALREADY_VALIDATED ?
+                        {(token && errorCode !== errorCodes.USER_ALREADY_VALIDATED && errorCode !== errorCodes.RESOURCE_NOT_FOUND) ?
                         <>
                         <p className="text-gray-600 mb-4">
                             If your verification link has expired, you can request a new one.
