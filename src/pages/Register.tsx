@@ -8,15 +8,7 @@ import InputField from '../components/InputField';
 
 import useFormValidation from '../hooks/useFormValidation';
 
-import {
-  MIN_USERNAME_LENGTH,
-  EMAIL_REGEX,
-  HAS_UPPERCASE_REGEX,
-  HAS_LOWERCASE_REGEX,
-  HAS_NUMBER_REGEX,
-  HAS_SPECIAL_CHAR_REGEX,
-  MIN_PASSWORD_LENGTH,
-} from '../constants';
+import * as validation from '../utils/validation';
 
 const Register: React.FC = () => {
 
@@ -34,46 +26,10 @@ const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const validationRules = {
-    username: (value: string) => {
-      if (value.trim() === '') {
-        return 'Username is required.';
-      } else if (value.length < MIN_USERNAME_LENGTH) {
-        return `Username must be at least ${MIN_USERNAME_LENGTH} characters long.`;
-      }
-      return null;
-    },
-    email: (value: string) => {
-      if (value.trim() === '') {
-        return 'Email address is required.';
-      } else if (!EMAIL_REGEX.test(value)) {
-        return 'Please enter a valid email address.';
-      }
-      return null;
-    },
-    password: (value: string) => {
-      if (value.trim() === '') {
-        return 'Password is required.';
-      } else if (value.length < MIN_PASSWORD_LENGTH) {
-        return `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`;
-      } else if (!HAS_UPPERCASE_REGEX.test(value)) {
-        return 'Password must contain at least one uppercase letter.';
-      } else if (!HAS_LOWERCASE_REGEX.test(value)) {
-        return 'Password must contain at least one lowercase letter.';
-      } else if (!HAS_NUMBER_REGEX.test(value)) {
-        return 'Password must contain at least one number.';
-      } else if (!HAS_SPECIAL_CHAR_REGEX.test(value)) {
-        return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).';
-      }
-      return null;
-    },
-    confirmPassword: (value: string, allValues: typeof initialValues) => {
-      if (value.trim() === '') {
-        return 'Confirm password is required.';
-      } else if (value !== allValues.password) {
-        return 'Passwords do not match.';
-      }
-      return null;
-    },
+    username: (value: string) => validation.validateUsername(value),
+    email: (value: string) => validation.validateEmail(value),
+    password: (value: string) => validation.validatePasword(value),
+    confirmPassword: (value: string, allValues: typeof initialValues) => validation.validateConfirmPassword(value, allValues),
   };
 
   const {

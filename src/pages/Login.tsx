@@ -9,7 +9,7 @@ import InputField from '../components/InputField';
 
 import useFormValidation from '../hooks/useFormValidation';
 
-import { EMAIL_REGEX } from '../constants';
+import { constants } from '../constants';
 
 const Login: React.FC = () => {
 
@@ -27,7 +27,7 @@ const Login: React.FC = () => {
         usernameOrEmail: (value: string) => {
             if (value.trim() === '') {
                 return 'Email address is required.';
-            } else if (!EMAIL_REGEX.test(value)) {
+            } else if (!constants.EMAIL_REGEX.test(value)) {
                 return 'Please enter a valid email address.';
             }
             return null; // No error
@@ -126,6 +126,15 @@ const Login: React.FC = () => {
             </p>
           )}
           </form>
+
+          {/* Forgot Password Link */}
+        <div className="text-right mb-4">
+          <Link
+            to="/forgot-password"
+            className="text-sm text-indigo-600 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
 
           {/* Link to Registration */}
           <div className="mt-6 text-center">

@@ -45,3 +45,8 @@ export async function sendForgotPasswordEmail(email: string): Promise<ApiRespons
   const { data } = await api.post<ApiResponse<void>>("/auth/forgot-password", {email});
   return data;
 };
+
+export async function sendResetPassword(token: string, password: string): Promise<ApiResponse<void>> {
+  const { data } = await api.post<ApiResponse<void>>("/auth/reset-password", {token, password});
+  return data;
+}
